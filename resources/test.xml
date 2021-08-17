@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<channels>
+    <channel id="11">
+        <article id="65abd" subject="udland">
+            <headline>Overskrift 1</headline>
+            <intro>Her står introteksten</intro>
+        </article>
+    </channel>
+    <channel id="22">
+        <article id="42bba" subject="indland">
+            <headline>Overskrift 2</headline>
+            <intro>Og her står så den andre introtekst</intro>
+        </article>
+    </channel>
+</channels>
