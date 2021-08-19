@@ -6,10 +6,10 @@ import (
 	"unicode"
 )
 
-type Token int
+type TokenType int
 
 const (
-	EOF Token = iota
+	EOF TokenType = iota
 	ILLEGAL
 	ELEMENT
 	DELIMETER
@@ -20,50 +20,60 @@ const (
 	VALUE
 )
 
-var tokens = []string {
-	EOF:		"EOF",
-	ILLEGAL:	"ILL",
-	DELIMETER:	"DEL",
-	ELEMENT:	"ELM",
-	ATTRIBUTE:	"ATR",
+var tokens = []string{
+	EOF:             "EOF",
+	ILLEGAL:         "ILL",
+	DELIMETER:       "DEL",
+	ELEMENT:         "ELM",
+	ATTRIBUTE:       "ATR",
 	CONDITION_START: "[",
-	CONDITION_END: "]",
-	EQUALS: "=",
-	VALUE: "VAL",
+	CONDITION_END:   "]",
+	EQUALS:          "=",
+	VALUE:           "VAL",
 }
 
-func (t Token) String() string {
+func (t TokenType) String() string {
 	return tokens[t]
 }
 
-
+type Token struct {
+	Tokentype TokenType
+	Position  Position
+	Value     string
+}
 
 type Position int
 
 type Lexer struct {
-	pos Position
+	pos    Position
 	reader *bufio.Reader
 }
 
-
 func NewLexer(reader io.Reader) *Lexer {
-	return &Lexer {
-		pos:	0,
-		reader:	bufio.NewReader(reader),
+	return &Lexer{
+		pos:    0,
+		reader: bufio.NewReader(reader),
 	}
 }
 
-
 func (l *Lexer) LexAll() []Token {
-	var tokens map[Token]string
-	var next_token Token
-}
+	var tokens []Token
 
+	for {
+		next_token := l.LexNext()
+		tokens = append(tokens, next_token)
+
+		if next_token.Tokentype == EOF {
+			break
+		}
+	}
+	return tokens
+}
 
 // Lex scans the input for the next token. It returns the position of the token,
 // the token's type, and the literal value.
 
-func (l *Lexer) LexNext() (Position, Token, string) {
+func (l *Lexer) LexNext() Token {
 
 	for {
 		r, _, err := l.reader.ReadRune()
@@ -71,7 +81,7 @@ func (l *Lexer) LexNext() (Position, Token, string) {
 
 		if err != nil {
 			if err == io.EOF {
-				return l.pos, EOF, ""
+				return Token{Position: l.pos, Tokentype: EOF, Value: ""}
 			}
 			panic(err)
 		}
@@ -80,32 +90,30 @@ func (l *Lexer) LexNext() (Position, Token, string) {
 
 		case '/':
 			lit := l.lexDelimiter()
-			return l.pos, DELIMETER, lit
+			return Token{Position: l.pos, Tokentype: DELIMETER, Value: lit}
 
 		case '[':
-			return l.pos, CONDITION_START, "["
+			return Token{Position: l.pos, Tokentype: CONDITION_START, Value: string(r)}
 
 		case ']':
-			return l.pos, CONDITION_START, "]"
+			return Token{Position: l.pos, Tokentype: CONDITION_END, Value: string(r)}
 
 		case '=':
-			return l.pos, EQUALS, "="
-
+			return Token{Position: l.pos, Tokentype: EOF, Value: string(r)}
 
 		case '@':
-			start_pos := l.pos
 			lit := "@" + l.lexAttribute()
-			return start_pos, ATTRIBUTE, lit
+			return Token{Position: l.pos, Tokentype: ATTRIBUTE, Value: lit}
 
 		default:
 			if unicode.IsSpace(r) {
-				return l.pos, ILLEGAL, "<space>"
+				return Token{Position: l.pos, Tokentype: ILLEGAL, Value: "<space>"}
 
 			} else if unicode.IsLetter(r) || unicode.IsDigit(r) {
 				start_pos := l.pos
 				l.backup()
 				lit := l.lexElement()
-				return start_pos, ELEMENT, lit			
+				return Token{Position: start_pos, Tokentype: ELEMENT, Value: lit}
 			}
 		}
 	}
@@ -125,8 +133,6 @@ func (l *Lexer) lexDelimiter() string {
 	l.backup()
 	return "/"
 }
-
-
 
 func (l *Lexer) backup() {
 	if err := l.reader.UnreadRune(); err != nil {
@@ -162,7 +168,7 @@ func (l *Lexer) lexElement() string {
 		if err != nil {
 			if err == io.EOF {
 				return lit
-			} 
+			}
 		}
 
 		l.pos++
