@@ -8,8 +8,6 @@ import (
 	"strings"
 )
 
-
-
 func listElements(filename string, attribute bool) {
 
 	reader, err := os.Open(filename)
@@ -38,10 +36,8 @@ func listElements(filename string, attribute bool) {
 					fmt.Printf("Attribute: \t /%s/@%s\n", strings.Join(stack, "/"), attribute.Name.Local)
 				}
 			}
-			break
 		case xml.EndElement:
 			stack = stack[0 : len(stack)-1]
-			break
 		case xml.CharData:
 			break
 		default:

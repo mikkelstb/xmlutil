@@ -18,7 +18,6 @@ const (
 
 func selectFromXpath(xpath string, xml_file string) {
 
-
 	//Open file location, ang get an io.Reader compatible object
 	file_reader, err := os.Open(xml_file)
 	if err != nil {
@@ -49,7 +48,7 @@ func selectFromXpath(xpath string, xml_file string) {
 }
 
 func analyseXpath(xpath string) xpathType {
-	attribute_pattern := regexp.MustCompile("@\\w+?$")
+	attribute_pattern := regexp.MustCompile(`@\w+?$`)
 
 	if attribute_pattern.MatchString(xpath) {
 		return ATTRIBUTE
