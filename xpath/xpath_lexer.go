@@ -99,7 +99,7 @@ func (l *Lexer) LexNext() Token {
 			return Token{Position: l.pos, Tokentype: CONDITION_END, Value: string(r)}
 
 		case '=':
-			return Token{Position: l.pos, Tokentype: EOF, Value: string(r)}
+			return Token{Position: l.pos, Tokentype: EQUALS, Value: string(r)}
 
 		case '@':
 			lit := "@" + l.lexAttribute()
@@ -152,7 +152,7 @@ func (l *Lexer) lexAttribute() string {
 		}
 
 		l.pos++
-		if unicode.IsLetter(r) {
+		if unicode.IsLetter(r) || unicode.IsDigit(r) {
 			lit = lit + string(r)
 		} else {
 			l.backup()

@@ -26,7 +26,7 @@ func main() {
 		lexer := xpath.NewLexer(strings.NewReader(arguments[1]))
 
 		for id, token := range lexer.LexAll() {
-			fmt.Printf("ID: %v, POS: %v, TYPE: %v, VAL: %v \n", id, token.Position, token.Tokentype, token.Value)
+			fmt.Printf("ID: %3d, POS: %3d, TYPE: %-3v VAL: %v \n", id, token.Position, token.Tokentype, token.Value)
 		}
 	}
 }
